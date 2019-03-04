@@ -7,7 +7,8 @@ char b[100][41];
 int flag = 1;
 int number = 5;
 int locnum = 0;
-int timer = 50;
+int timer = 100;
+int score = 0;
 
 struct location {
 	int sta;
@@ -30,13 +31,16 @@ void refresh();
 void move();
 void play();
 void food();
+void eatfood();
 
 int main()
 {
+	printf("简易的贪吃蛇，方向键控制，按任意键开始。\n");
+	getchar();
 	init();
 	play();
 	system("cls");
-	printf("You die!\n");
+	printf("You die!\n""Your score is: %d\n", score);
 	getchar();
 	return 0;
 }
@@ -65,7 +69,7 @@ void init()
 	for (int a = 0; a < number; a++)
 	{
 		body[a].statu = 1;
-		body[a].x2 = 40 - a;
+		body[a].x2 = 40 - a * 2;
 		body[a].y2 = 20;
 		if (a == 0)
 		{
@@ -102,17 +106,22 @@ void move(int bo)
 	switch(body[bo].statu)
 	{
 	case 1: 
-		if (b[body[bo].x2 + 1][body[bo].y2] != ' ')
+		if (b[body[bo].x2 + 2][body[bo].y2] != ' ' && b[body[bo].x2 + 2][body[bo].y2] != '$')
 		{
 			flag = 0;
 			break;
 		}   //判定死亡
-		b[body[bo].x2 + 1][body[bo].y2] = b[body[bo].x2][body[bo].y2];
+		b[body[bo].x2 + 2][body[bo].y2] = b[body[bo].x2][body[bo].y2];
 		b[body[bo].x2][body[bo].y2] = ' ';
 		body[bo].x2++;
+		body[bo].x2++;
+		if (b[body[bo].x2 + 2][body[bo].y2] == '$')
+		{
+			eatfood();
+		}
 		break;
 	case 2:
-		if (b[body[bo].x2][body[bo].y2 +1] != ' ')
+		if (b[body[bo].x2][body[bo].y2 +1] != ' ' && b[body[bo].x2][body[bo].y2 + 1] != '$')
 		{
 			flag = 0;
 			break;
@@ -120,19 +129,28 @@ void move(int bo)
 		b[body[bo].x2][body[bo].y2 + 1] = b[body[bo].x2][body[bo].y2];
 		b[body[bo].x2][body[bo].y2] = ' ';
 		body[bo].y2++;
+		if (b[body[bo].x2][body[bo].y2 + 1] == '$')
+		{
+			eatfood();
+		}
 		break;
 	case 3:
-		if (b[body[bo].x2 - 1][body[bo].y2] != ' ')
+		if (b[body[bo].x2 - 2][body[bo].y2] != ' ' && b[body[bo].x2 - 2][body[bo].y2] != '$')
 		{
 			flag = 0;
 			break;
 		}
-		b[body[bo].x2 - 1][body[bo].y2] = b[body[bo].x2][body[bo].y2];
+		b[body[bo].x2 - 2][body[bo].y2] = b[body[bo].x2][body[bo].y2];
 		b[body[bo].x2][body[bo].y2] = ' ';
 		body[bo].x2--;
+		body[bo].x2--;
+		if (b[body[bo].x2 - 2][body[bo].y2] == '$')
+		{
+			eatfood();
+		}
 		break;
 	case 4:
-		if (b[body[bo].x2][body[bo].y2 -1] != ' ')
+		if (b[body[bo].x2][body[bo].y2 -1] != ' ' && b[body[bo].x2][body[bo].y2 - 1] != '$')
 		{
 			flag = 0;
 			break;
@@ -140,6 +158,10 @@ void move(int bo)
 		b[body[bo].x2][body[bo].y2 - 1] = b[body[bo].x2][body[bo].y2];
 		b[body[bo].x2][body[bo].y2] = ' ';
 		body[bo].y2--;
+		if (b[body[bo].x2][body[bo].y2 - 1] == '$')
+		{
+			eatfood();
+		}
 		break;
 	}
 }
@@ -207,7 +229,7 @@ void play()
 		{
 			move(m);
 		}
-		if (timer == 50)
+		if (timer == 100)
 		{
 			food();
 			timer = 0;
@@ -237,10 +259,47 @@ void food()
 	{
 		int x3 = (rand() % 98) + 1;
 		int y3 = (rand() % 39) + 1;
-		if (b[x3][y3] == ' ' || b[x3][y3] == '$')
+		if ((b[x3][y3] == ' ' || b[x3][y3] == '$') && x3%2 == 0)
 		{
 			b[x3][y3] = '$';
 			flag = 0;
 		}
 	}
+}
+
+void eatfood()
+{
+	switch (body[number - 1].statu)
+	{
+	case 1:
+		body[number].statu = body[number - 1].statu;
+		body[number].x2 = body[number - 1].x2 - 2;
+		body[number].y2 = body[number - 1].y2;
+		b[body[number].x2][body[number].y2] = '0';
+		number++;
+		break;
+	case 2:
+		body[number].statu = body[number - 1].statu;
+		body[number].x2 = body[number - 1].x2;
+		body[number].y2 = body[number - 1].y2 - 1;
+		b[body[number].x2][body[number].y2] = '0';
+		number++;
+		break;
+	case 3:
+		body[number].statu = body[number - 1].statu;
+		body[number].x2 = body[number - 1].x2 + 2;
+		body[number].y2 = body[number - 1].y2;
+		b[body[number].x2][body[number].y2] = '0';
+		number++;
+		break;
+	case 4:
+		body[number].statu = body[number - 1].statu;
+		body[number].x2 = body[number - 1].x2;
+		body[number].y2 = body[number - 1].y2 + 1;
+		b[body[number].x2][body[number].y2] = '0';
+		number++;
+		break;
+	}
+	food();
+	score++;
 }
