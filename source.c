@@ -40,7 +40,7 @@ int main()
 	init();	//游戏初始化
 	play();	//游戏操作函数
 	system("cls");	//清空屏幕
-	printf("You die!\n""Your score is: %d\n", score);	//结束界面
+	printf("You die!\n""Your score is: %d\n", score * 10);	//结束界面
 	getchar();	//用以使界面暂停
 	return 0;
 }
@@ -85,6 +85,7 @@ void init()		//初始化函数
 	{
 		loc[k].flag = 0;
 	}
+	food();
 	body[0].statu = 1;	//初始方向初始化，向右运动
 }
 
@@ -105,10 +106,6 @@ void move(int bo)	//移动函数，有一个参数用以选择第几节身体
 		getxy(body[bo].x2, body[bo].y2);
 		putchar(' ');
 		body[bo].x2 += 2;	//更新身体数据
-		if (b[body[bo].x2 + 2][body[bo].y2] == '$')	//判定前方是否有食物
-		{
-			eatfood();	//进食函数
-		}
 		break;
 	case 2:	//向下
 		if (b[body[bo].x2][body[bo].y2 +1] != ' ' && b[body[bo].x2][body[bo].y2 + 1] != '$')
@@ -123,10 +120,6 @@ void move(int bo)	//移动函数，有一个参数用以选择第几节身体
 		getxy(body[bo].x2, body[bo].y2);
 		putchar(' ');
 		body[bo].y2++;
-		if (b[body[bo].x2][body[bo].y2 + 1] == '$')
-		{
-			eatfood();
-		}
 		break;
 	case 3:	//向左
 		if (b[body[bo].x2 - 2][body[bo].y2] != ' ' && b[body[bo].x2 - 2][body[bo].y2] != '$')
@@ -142,10 +135,6 @@ void move(int bo)	//移动函数，有一个参数用以选择第几节身体
 		putchar(' ');
 		body[bo].x2--;
 		body[bo].x2--;
-		if (b[body[bo].x2 - 2][body[bo].y2] == '$')
-		{
-			eatfood();
-		}
 		break;
 	case 4:	//向上
 		if (b[body[bo].x2][body[bo].y2 -1] != ' ' && b[body[bo].x2][body[bo].y2 - 1] != '$')
@@ -160,19 +149,17 @@ void move(int bo)	//移动函数，有一个参数用以选择第几节身体
 		getxy(body[bo].x2, body[bo].y2);
 		putchar(' ');
 		body[bo].y2--;
-		if (b[body[bo].x2][body[bo].y2 - 1] == '$')
-		{
-			eatfood();
-		}
 		break;
 	}
 }
 
 void play()	//游戏操作函数，用以判断玩家按键与计时刷新
 {
-	int a,b,m;	//定义for循环需要用的变量
+	int x,y,m, flag1;	//定义for循环需要用的变量
 	while (flag)	//游戏进行开关，关闭flag则结束游戏
 	{
+		if (9999 == locnum)
+			locnum = 1;
 		if (GetAsyncKeyState(VK_UP) && body[0].statu != 2)	//判断是否按下上方向键
 		{
 			body[0].statu = 4;	//设置蛇头的方向参数为上
@@ -209,18 +196,18 @@ void play()	//游戏操作函数，用以判断玩家按键与计时刷新
 			loc[locnum].y1 = body[0].y2;
 			locnum++;
 		}
-		for (a = 1; a < number; a++)	//判定已打开转向点上是否有字符，如果有就改变字符的方向参数，蛇尾通过时则关闭该转向点。
+		for (x = 1; x < number; x++)	//判定已打开转向点上是否有字符，如果有就改变字符的方向参数，蛇尾通过时则关闭该转向点。
 		{
-			for (b = 0; b < 10000; b++)
+			for (y = 0; y < 10000; y++)
 			{
-				if (loc[b].flag)
+				if (loc[y].flag)
 				{
-					if (loc[b].x1 == body[a].x2 && loc[b].y1 == body[a].y2) //判定蛇身与转向点坐标是否重合
+					if (loc[y].x1 == body[x].x2 && loc[y].y1 == body[x].y2) //判定蛇身与转向点坐标是否重合
 					{
-						body[a].statu = loc[b].sta;	//改变蛇身方向参数
-						if (a == number - 1)	//判定是否为蛇尾
+						body[x].statu = loc[y].sta;	//改变蛇身方向参数
+						if (x == number - 1)	//判定是否为蛇尾
 						{
-							loc[b].flag = 0;	//关闭转向点
+							loc[y].flag = 0;	//关闭转向点
 						}
 					}
 				}
@@ -231,7 +218,7 @@ void play()	//游戏操作函数，用以判断玩家按键与计时刷新
 		{
 			move(m);
 		}
-		if (timer == 100)	//根据间隔刷新食物
+		if (timer == 200)	//根据间隔刷新食物
 		{
 			food();
 			timer = 0;
@@ -240,8 +227,20 @@ void play()	//游戏操作函数，用以判断玩家按键与计时刷新
 		{
 			timer++;
 		}
+		flag1 = 1;
+		for (y = 0; y <= 40; y++)	//吃掉食物后加分
+		{
+			for (x = 0; x <= 99; x++)
+			{
+				if (b[x][y] == '$')
+				{
+					flag1 = 0;
+				}
+			}
+		}
+		if (flag1) eatfood();
 		getxy(0, 41);
-		printf("Score: %d  number: %d", score, number);
+		printf("Score: %d", score * 10);
 	}
 }
 
@@ -319,6 +318,7 @@ void eatfood()	//进食函数
 	}
 	food();	//生成新的食物
 	score++;	//分数加一
+	timer = 0;
 }
 
 void getxy(int x, int y) //移动光标函数，用以实现字符的变化
